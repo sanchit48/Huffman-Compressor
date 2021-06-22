@@ -1,17 +1,24 @@
 package com.sanchit;
 
 import java.util.PriorityQueue;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.FileOutputStream;
 import java.io.FileReader;
 import java.io.FileWriter;
+import java.io.IOException;
+import java.io.ObjectOutputStream;
 
 public class HuffmanEncoder {
 
 	private static int ALPHABET_SIZE = 256;
-
-	static class HuffmanEncodedResult {
+    private static ArrayList<String> dataInString;
+    private static int bytes[] = {0x00, 0x01, 0x03, 0x07, 0x0f, 0x1f, 0x3f, 0x7f, 0xff, 0x1ff, 0x3ff, 0x7ff,
+			0xfff, 0x1fff, 0x3fff, 0x7fff, 0xffff, 0x1ffff, 0x3ffff, 0x7ffff, 0xfffff, 0x1fffff, 0x3fffff, 0x7fffff,
+			0xffffff, 0x1ffffff, 0x3ffffff, 0x7ffffff, 0xfffffff, 0x1fffffff, 0x3fffffff, 0x7fffffff, 0xffffffff };
+    static class HuffmanEncodedResult {
 		String encodedData;
 		Node root;
 
@@ -47,8 +54,10 @@ public class HuffmanEncoder {
 
 	public static String generateEncodedData(String data, HashMap<Character, String> lookupTable) {
 		StringBuilder builder = new StringBuilder();
-		for (char character : data.toCharArray())
-			builder.append(lookupTable.get(character));
+		for (char character : data.toCharArray()) {
+			builder.append(lookupTable.get(character)+"\n");
+			dataInString.add(lookupTable.get(character));
+		}
 
 		return builder.toString();
 	}
@@ -108,13 +117,20 @@ public class HuffmanEncoder {
 		buildLookupTableHelper(root.right, s + '1', lookupTable);
 	}
 
+	
 	public static void main(String[] args) {
 
+		String fileName = "/Users/sanchit/git/Huffman-Compressor/Huffman-Compressor/src/com/sanchit/compressed_file.txt";
+		dataInString = new ArrayList<>();
 		try {
+			FileOutputStream fileOs = new FileOutputStream(fileName); 
+			ObjectOutputStream os = new ObjectOutputStream(fileOs);
+
 			BufferedReader br = new BufferedReader(new FileReader(
-					"/Users/sanchit/eclipse-workspace/Huffman-Compressor/src/com/sanchit/input_file.txt"));
+					"/Users/sanchit/git/Huffman-Compressor/Huffman-Compressor/src/com/sanchit/input_file.txt"));
+			
 			BufferedWriter bw = new BufferedWriter(new FileWriter(
-					"/Users/sanchit/eclipse-workspace/Huffman-Compressor/src/com/sanchit/output_file.txt"));
+					"/Users/sanchit/git/Huffman-Compressor/Huffman-Compressor/src/com/sanchit/encoded_data_file.txt"));
 
 			String s;
 			StringBuilder data = new StringBuilder();
@@ -126,6 +142,12 @@ public class HuffmanEncoder {
 			} else {
 				HuffmanEncodedResult huffmanEncodedResult = compress(data.toString());
 				String decompressedData = HuffmanDecoder.decompress(huffmanEncodedResult);
+				for(String d: dataInString) {
+					int n = Integer.parseInt(d, 2);
+					// System.out.println(n);
+					// 5&0x3 gives lower 2 bits of 5 i.e 3
+					os.writeByte(n&bytes[d.length()]);
+				}
 				bw.write(huffmanEncodedResult.encodedData);
 			}
 
