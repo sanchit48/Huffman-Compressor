@@ -12,7 +12,8 @@ public class HuffmanDecoder {
 
 		int ptr = 0;
 		while(ptr < result.encodedData.length()) {
-			while(cur.left != null && cur.right != null) {
+			while(ptr < result.encodedData.length() && cur.left != null && cur.right != null) {
+			
 				char bit = result.encodedData.charAt(ptr);
 				if(bit == '1') {
 					cur = cur.right;
